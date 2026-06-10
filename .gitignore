@@ -1,0 +1,135 @@
+# ============================================================
+# Raw sequencing and alignment files
+# ============================================================
+
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.bam
+*.bai
+*.sam
+*.cram
+*.vcf
+*.vcf.gz
+
+# ============================================================
+# Fragment files and indexes
+# ============================================================
+
+*.frag.gz
+*.frag.gz.tbi
+*.bed.gz
+*.bed.gz.tbi
+
+# ============================================================
+# Reference genomes
+# ============================================================
+
+*.2bit
+*.fa
+*.fasta
+*.fai
+
+# ============================================================
+# Private metadata
+# ============================================================
+
+*patient*
+*clinical*
+*metadata_private*
+*sample_info_private*
+*identifier*
+
+# ============================================================
+# Generated results
+# Keep folders, ignore real result files
+# ============================================================
+
+results/**/*.csv
+results/**/*.tsv
+results/**/*.xlsx
+results/**/*.rds
+results/**/*.RData
+results/**/*.png
+results/**/*.pdf
+results/**/*.svg
+
+# Keep .gitkeep placeholder files in results folders
+!results/**/.gitkeep
+
+# ============================================================
+# Large/intermediate/output folders
+# ============================================================
+
+outputs/
+tmp/
+cache/
+
+# ============================================================
+# Slurm / log files
+# ============================================================
+
+*.log
+*.out
+*.err
+
+# ============================================================
+# macOS
+# ============================================================
+
+.DS_Store
+
+# ============================================================
+# R / RStudio
+# ============================================================
+
+.Rproj.user/
+.Rhistory
+.RData
+
+# ============================================================
+# Python
+# ============================================================
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ============================================================
+# Secrets and private config files
+# ============================================================
+
+.env
+*.key
+*.pem
+config_private.*
+
+# Temporary / broken script backups
+*.bak
+*.broken
+*.backup
+*.tmp
+*~
+metadata/*.bed
+*.bed
+
+# macOS
+.DS_Store
+
+# Data and results
+results/
+data/raw/
+data/private/
+data/example/
+
+# Genomic interval files not shared publicly
+*.bed
+metadata/*.bed
+
+# Temporary files
+*.bak
+*.backup
+*.tmp
+*~
