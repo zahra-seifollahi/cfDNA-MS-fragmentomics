@@ -152,26 +152,29 @@ make_display_name <- function(feature, feature_set) {
   feature <- as.character(feature)
   feature_set <- standardize_feature_set(feature_set)
 
-  if (feature_set == "Regional MDS") {
-    x <- str_replace(feature, "^regional_MDS_", "")
-    return(
-      ifelse(
-        str_detect(x, "^chr[^_]+_\\d+_\\d+$"),
-        str_replace(x, "^(chr[^_]+)_(\\d+)_(\\d+)$", "\\1:\\2-\\3"),
-        x
-      )
+  out <- feature
+
+  idx_regional <- feature_set == "Regional MDS"
+  if (any(idx_regional, na.rm = TRUE)) {
+    x <- feature[idx_regional]
+    x <- str_replace(x, "^regional_MDS_", "")
+    out[idx_regional] <- ifelse(
+      str_detect(x, "^chr[^_]+_\\d+_\\d+$"),
+      str_replace(x, "^(chr[^_]+)_(\\d+)_(\\d+)$", "\\1:\\2-\\3"),
+      x
     )
   }
 
-  if (feature_set == "Bioanalyzer length bins") {
-    x <- feature
+  idx_bio <- feature_set == "Bioanalyzer length bins"
+  if (any(idx_bio, na.rm = TRUE)) {
+    x <- feature[idx_bio]
     x <- str_replace(x, "^length_", "")
     x <- str_replace(x, "bp$", "")
     x <- str_replace_all(x, "_", "-")
-    return(paste0(x, " bp"))
+    out[idx_bio] <- paste0(x, " bp")
   }
 
-  feature
+  out
 }
 
 # ============================================================
