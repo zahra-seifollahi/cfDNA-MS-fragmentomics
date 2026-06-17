@@ -1,11 +1,11 @@
 sample,group,frag_file,synthetic,n_fragments,file_format,genome_build,note
-Cap01_example,Healthy,data/example/fragments/Cap01_example.frag.gz,TRUE,1000,frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
-Cap02_example,Healthy,data/example/fragments/Cap02_example.frag.gz,TRUE,1000,frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
-Cap03_example,Healthy,data/example/fragments/Cap03_example.frag.gz,TRUE,1000,frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
-Cap04_example,Healthy,data/example/fragments/Cap04_example.frag.gz,TRUE,1000,frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
-Cap05_example,Remission,data/example/fragments/Cap05_example.frag.gz,TRUE,1000,frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
-Cap06_example,Remission,data/example/fragments/Cap06_example.frag.gz,TRUE,1000,frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
-Cap07_example,Remission,data/example/fragments/Cap07_example.frag.gz,TRUE,1000,frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
-Cap08_example,Relapse,data/example/fragments/Cap08_example.frag.gz,TRUE,1000,frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
-Cap09_example,Relapse,data/example/fragments/Cap09_example.frag.gz,TRUE,1000,frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
-Cap10_example,Relapse,data/example/fragments/Cap10_example.frag.gz,TRUE,1000,frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
+Cap01_example,Healthy,data/example/fragments/Cap01_example.frag.gz,TRUE,1000,tabix-indexed BED-style frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
+Cap02_example,Healthy,data/example/fragments/Cap02_example.frag.gz,TRUE,1000,tabix-indexed BED-style frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
+Cap03_example,Healthy,data/example/fragments/Cap03_example.frag.gz,TRUE,1000,tabix-indexed BED-style frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
+Cap04_example,Healthy,data/example/fragments/Cap04_example.frag.gz,TRUE,1000,tabix-indexed BED-style frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
+Cap05_example,Remission,data/example/fragments/Cap05_example.frag.gz,TRUE,1000,tabix-indexed BED-style frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
+Cap06_example,Remission,data/example/fragments/Cap06_example.frag.gz,TRUE,1000,tabix-indexed BED-style frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
+Cap07_example,Remission,data/example/fragments/Cap07_example.frag.gz,TRUE,1000,tabix-indexed BED-style frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
+Cap08_example,Relapse,data/example/fragments/Cap08_example.frag.gz,TRUE,1000,tabix-indexed BED-style frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
+Cap09_example,Relapse,data/example/fragments/Cap09_example.frag.gz,TRUE,1000,tabix-indexed BED-style frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
+Cap10_example,Relapse,data/example/fragments/Cap10_example.frag.gz,TRUE,1000,tabix-indexed BED-style frag.gz,synthetic_hg19_like,Synthetic example data for GitHub testing only
