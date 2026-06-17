@@ -87,6 +87,9 @@ cache/
 .Rproj.user/
 .Rhistory
 .RData
+.Rprofile
+renv/
+renv/library/
 
 # ============================================================
 # Python
