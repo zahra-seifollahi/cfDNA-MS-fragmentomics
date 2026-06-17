@@ -364,14 +364,16 @@ Before running the scripts, users should adapt:
 * output directory permissions
 
 Private paths, raw sequencing data, generated results, and BED files should not be committed.
+
 ## R environment
 
-The R package environment is documented in `renv.lock`. To restore the environment, open R in the project directory and run:
+The R package environment is documented using `renv.lock`.
+
+To restore the R environment, open R in the project directory and run:
 
 ```r
 install.packages("renv")
 renv::restore()
-```
 
 ---
 
