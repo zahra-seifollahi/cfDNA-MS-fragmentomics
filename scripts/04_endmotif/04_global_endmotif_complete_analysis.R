@@ -748,21 +748,21 @@ if (length(top50_motifs) >= 2) {
 if (has_ggseqlogo && has_patchwork) {
   library(ggseqlogo)
   library(patchwork)
-
+  
   padj_cutoff <- 0.05
   log2fc_cutoff <- log2(1.25)
   top_n <- 30
   eps <- 1e-8
-
+  
   relapse_healthy_df <- lapply(colnames(motif_df), function(m) {
     x_h <- motif_df[group == "Healthy", m]
     x_r <- motif_df[group == "Relapse", m]
-
+    
     wt <- wilcox.test(x_r, x_h, exact = FALSE)
-
+    
     mean_h <- mean(x_h, na.rm = TRUE)
     mean_r <- mean(x_r, na.rm = TRUE)
-
+    
     data.frame(
       motif = m,
       Healthy_mean = mean_h,
@@ -776,83 +776,181 @@ if (has_ggseqlogo && has_patchwork) {
     bind_rows() %>%
     mutate(
       padj = p.adjust(p_value, method = "BH"),
-      neg_log10_padj = -log10(padj),
+      neg_log10_padj = -log10(padj + 1e-300),
       direction = case_when(
         padj < padj_cutoff & log2FC >= log2fc_cutoff ~ "Higher in Relapse",
         padj < padj_cutoff & log2FC <= -log2fc_cutoff ~ "Higher in Healthy",
         TRUE ~ "Other"
       )
     )
-
-  write_tsv(relapse_healthy_df, file.path(table_dir, "relapse_vs_healthy_endmotif_wilcoxon.tsv"))
-
+  
+  write_tsv(
+    relapse_healthy_df,
+    file.path(table_dir, "relapse_vs_healthy_endmotif_wilcoxon.tsv")
+  )
+  
   top_relapse <- relapse_healthy_df %>%
     filter(direction == "Higher in Relapse") %>%
     arrange(padj, desc(abs(log2FC))) %>%
     slice_head(n = top_n)
-
+  
   top_healthy <- relapse_healthy_df %>%
     filter(direction == "Higher in Healthy") %>%
     arrange(padj, desc(abs(log2FC))) %>%
     slice_head(n = top_n)
-
+  
+  # ------------------------------------------------------------
+  # Export top 30 Relapse-enriched and Healthy-enriched motifs
+  # used for weighted SeqLogo
+  # ------------------------------------------------------------
+  
+  top_relapse_export <- top_relapse %>%
+    mutate(
+      enrichment_group = "Relapse-enriched",
+      logo_weight = abs(log2FC) * (-log10(padj + 1e-300)),
+      rank_for_seqlogo = row_number()
+    ) %>%
+    select(
+      rank_for_seqlogo,
+      enrichment_group,
+      motif,
+      Healthy_mean,
+      Relapse_mean,
+      log2FC,
+      mean_difference,
+      p_value,
+      padj,
+      neg_log10_padj,
+      logo_weight,
+      direction
+    )
+  
+  top_healthy_export <- top_healthy %>%
+    mutate(
+      enrichment_group = "Healthy-enriched",
+      logo_weight = abs(log2FC) * (-log10(padj + 1e-300)),
+      rank_for_seqlogo = row_number()
+    ) %>%
+    select(
+      rank_for_seqlogo,
+      enrichment_group,
+      motif,
+      Healthy_mean,
+      Relapse_mean,
+      log2FC,
+      mean_difference,
+      p_value,
+      padj,
+      neg_log10_padj,
+      logo_weight,
+      direction
+    )
+  
+  write_tsv(
+    top_relapse_export,
+    file.path(table_dir, "top30_relapse_enriched_motifs_for_seqlogo.tsv")
+  )
+  
+  write_tsv(
+    top_healthy_export,
+    file.path(table_dir, "top30_healthy_enriched_motifs_for_seqlogo.tsv")
+  )
+  
+  write_tsv(
+    bind_rows(top_healthy_export, top_relapse_export),
+    file.path(table_dir, "top30_healthy_relapse_enriched_motifs_for_seqlogo.tsv")
+  )
+  
   make_weighted_pwm <- function(motifs, weights) {
     motifs <- toupper(motifs)
     weights <- as.numeric(weights)
     weights[is.na(weights)] <- 0
-
+    
     bases <- c("A", "C", "G", "T")
-    k <- nchar(motifs[1])
-
+    
+    valid <- !is.na(motifs) &
+      grepl("^[ACGT]{4}$", motifs) &
+      !is.na(weights) &
+      weights > 0
+    
+    motifs <- motifs[valid]
+    weights <- weights[valid]
+    
+    if (length(motifs) == 0) {
+      stop("No valid weighted 4-mer motifs were available for PWM construction.")
+    }
+    
+    k <- 4
+    
     mat <- matrix(0, nrow = 4, ncol = k)
     rownames(mat) <- bases
     colnames(mat) <- seq_len(k)
-
+    
     for (i in seq_along(motifs)) {
       chars <- strsplit(motifs[i], "")[[1]]
-      for (pos in seq_len(k)) {
-        mat[chars[pos], pos] <- mat[chars[pos], pos] + weights[i]
+      
+      # Explicitly use positions 1:4 to avoid position-order problems.
+      for (pos in 1:4) {
+        base <- chars[pos]
+        if (base %in% bases) {
+          mat[base, pos] <- mat[base, pos] + weights[i]
+        }
       }
     }
-
-    mat <- sweep(mat, 2, colSums(mat), "/")
+    
+    col_sums <- colSums(mat)
+    col_sums[col_sums == 0] <- 1
+    
+    mat <- sweep(mat, 2, col_sums, "/")
     mat[is.na(mat)] <- 0
-
+    
     return(mat)
   }
-
-  if (nrow(top_relapse) > 0 && nrow(top_healthy) > 0) {
-    top_relapse <- top_relapse %>%
-      mutate(logo_weight = abs(log2FC) * (-log10(padj)))
-
-    top_healthy <- top_healthy %>%
-      mutate(logo_weight = abs(log2FC) * (-log10(padj)))
-
-    pwm_relapse <- make_weighted_pwm(top_relapse$motif, top_relapse$logo_weight)
-    pwm_healthy <- make_weighted_pwm(top_healthy$motif, top_healthy$logo_weight)
-
+  
+  if (nrow(top_relapse_export) > 0 && nrow(top_healthy_export) > 0) {
+    
+    pwm_relapse <- make_weighted_pwm(
+      top_relapse_export$motif,
+      top_relapse_export$logo_weight
+    )
+    
+    pwm_healthy <- make_weighted_pwm(
+      top_healthy_export$motif,
+      top_healthy_export$logo_weight
+    )
+    
+    write_tsv(
+      as.data.frame(pwm_healthy) %>% rownames_to_column("base"),
+      file.path(table_dir, "seqlogo_top30_healthy_weighted_pwm.tsv")
+    )
+    
+    write_tsv(
+      as.data.frame(pwm_relapse) %>% rownames_to_column("base"),
+      file.path(table_dir, "seqlogo_top30_relapse_weighted_pwm.tsv")
+    )
+    
     p_logo_healthy <- ggseqlogo::ggseqlogo(pwm_healthy, method = "custom") +
       labs(
-        title = paste0("Top ", nrow(top_healthy), " motifs enriched in Healthy"),
+        title = paste0("Top ", nrow(top_healthy_export), " motifs enriched in Healthy"),
         subtitle = "Relapse vs Healthy; ranked by adjusted p-value and fold-change",
         x = "Motif position",
         y = "Weighted base probability"
       ) +
       theme_endmotif(base_size = 16) +
       theme(panel.border = element_blank())
-
+    
     p_logo_relapse <- ggseqlogo::ggseqlogo(pwm_relapse, method = "custom") +
       labs(
-        title = paste0("Top ", nrow(top_relapse), " motifs enriched in Relapse"),
+        title = paste0("Top ", nrow(top_relapse_export), " motifs enriched in Relapse"),
         subtitle = "Relapse vs Healthy; ranked by adjusted p-value and fold-change",
         x = "Motif position",
         y = "Weighted base probability"
       ) +
       theme_endmotif(base_size = 16) +
       theme(panel.border = element_blank())
-
+    
     p_seqlogo_top <- p_logo_healthy / p_logo_relapse
-
+    
     ggsave(
       file.path(figure_dir, "seqlogo_weighted_healthy_vs_relapse.png"),
       p_seqlogo_top,
@@ -860,10 +958,11 @@ if (has_ggseqlogo && has_patchwork) {
       height = 7,
       dpi = 300
     )
+    
   } else {
     cat("\nSkipping seqlogo because enriched motifs were not found in both directions.\n")
   }
-
+  
 } else {
   cat("\nPackages ggseqlogo and/or patchwork are not installed. Skipping seqlogo.\n")
 }
